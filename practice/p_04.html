@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fund Search</title>
+</head>
+
+<body>
+    <h1>Fund</h1>
+    <input type="text" id="tickerInput">
+    <button id="searchFund">Search</button>
+    <div id="displayarea" style="margin: 20px; background: blue;"></div>
+</body>
+
+<script>
+    document.getElementById('searchFund').addEventListener('click', () => {
+        const ticker = document.getElementById('tickerInput').value.toUpperCase();
+        const displayArea = document.getElementById('displayarea');
+        const apiKey = 'K2lT8CtzJx91xFUyRsHHhbTclmgJg6amH0cnome2';
+
+        if (!ticker) {
+            alert('กรุณากรอกชื่อย่อหุ้นหรือกองทุนก่อนครับ');
+            return;
+        }
+
+        displayArea.innerHTML = 'กำลังค้นหา...';
+
+        fetch(`https://api.api-ninjas.com/v1/mutualfund?ticker=${ticker}`, {
+            headers: { 'X-Api-Key': apiKey }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.fund_name) {
+                    displayArea.innerHTML = `
+                <div style="border: 2px solid #333; padding: 15px; border-radius: 10px; background-color: #f9f9f9;">
+                    <h2 style="margin: 0;">${data.fund_name}</h2>
+                    <p><strong>Ticker:</strong> ${data.fund_ticker}</p>
+                    <p><strong>Price:</strong> <span style="color: blue; font-size: 1.5em;">$${data.price}</span></p>
+                    <p><strong>Region:</strong> ${data.country}</p>
+                    <p><strong>Expense Ratio:</strong> ${data.expense_ratio}%</p>
+                </div>
+            `;
+                } else {
+                    displayArea.innerHTML = '<span style="color: red;">ไม่พบข้อมูลหุ้น/กองทุนนี้ กรุณาลองใหม่อีกครั้ง</span>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                displayArea.innerHTML = 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
+            });
+    });
+</script>
+
+</html>
