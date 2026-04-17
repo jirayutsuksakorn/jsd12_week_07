@@ -10,7 +10,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const ghost = document.getElementById('gusteau-ghost');
     const clickSound = document.getElementById('cookie-sound');
 
-    // --- ส่วนที่ 1: การคลิกคุกกี้ปกติ ---
+    // --- 1. ระบบคลิกคุกกี้ ---
     cookieImage.addEventListener('click', (e) => {
         score++;
         updateDisplay();
@@ -35,32 +35,32 @@ window.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => { cookieImage.classList.remove('clicked'); }, 80);
     });
 
-    // --- ส่วนที่ 2: ระบบ Gusteau's Ghost (โผล่ 10 วิ หาย 10 วิ) ---
+    // --- 2. ระบบผีเชฟกุสโต (โผล่ทันที / อยู่ 10 วิ / พัก 5 วิ) ---
     function spawnGhost() {
-        // สุ่มตำแหน่ง
+        // สุ่มตำแหน่งใหม่ (ผีจะค่อยๆ ลอยไปตำแหน่งนี้ตาม CSS Transition)
         const x = Math.random() * (window.innerWidth - 250) + 50;
         const y = Math.random() * (window.innerHeight - 250) + 50;
+
         ghost.style.left = `${x}px`;
         ghost.style.top = `${y}px`;
 
-        // แสดงตัว
+        // ปรากฏตัว
         ghost.classList.add('active');
 
-        // ตั้งเวลาให้หายไปหลังจาก 10 วินาที (10000ms)
+        // แช่อยู่ 10 วินาทีแล้วค่อยจางหาย
         setTimeout(() => {
             ghost.classList.remove('active');
         }, 10000);
     }
 
-    // คลิกที่ผีแล้วได้ +100
+    // คลิกที่ผีได้ +100
     ghost.addEventListener('click', () => {
         if (ghost.classList.contains('active')) {
-            score += 100; // เพิ่มคะแนน 100
+            score += 100;
             updateDisplay();
-
             ghost.classList.remove('active'); // คลิกแล้วหายทันที
 
-            // แสดงตัวเลข +100 สีฟ้า
+            // แจ้งเตือนโบนัส +100
             const bonusText = document.createElement('div');
             bonusText.innerText = `GUSTEAU'S BLESSING! +100`;
             bonusText.className = 'floating-number';
@@ -72,14 +72,16 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // วนลูปทุกๆ 20 วินาที (โผล่มาวินาทีที่ 0 อยู่จนถึงวินาทีที่ 10 แล้วรออีก 10 วินาทีเพื่อเริ่มใหม่)
-    spawnGhost(); // ให้โผล่ครั้งแรกทันทีที่รันเกม
+    // เริ่มทำงานทันทีที่โหลดหน้าเว็บ
+    spawnGhost();
+
+    // วนลูปทุกๆ 15 วินาที (อยู่ 10 วิ + หายไปพัก 5 วิ)
     setInterval(() => {
         spawnGhost();
-    }, 20000); // 20 วินาที = (อยู่ 10 วิ + หาย 10 วิ)
+    }, 15000);
 
 
-    // --- ส่วนที่ 3: ระบบร้านค้าและอัปเกรด ---
+    // --- 3. ระบบร้านค้าและอัปเกรด ---
     buyOvenBtn.addEventListener('click', () => {
         if (score >= ovenPrice) {
             score -= ovenPrice;
@@ -91,6 +93,7 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // เพิ่มแต้มอัตโนมัติตามค่า perSecond
     setInterval(() => {
         if (perSecond > 0) {
             score += perSecond;
@@ -98,10 +101,13 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }, 1000);
 
+    // ฟังก์ชันอัปเดตตัวเลขบนหน้าจอ
     function updateDisplay() {
         cookieDisplay.textContent = `${score} Cookies`;
         perSecondDisplay.textContent = `Per second: ${perSecond}`;
         buyOvenBtn.textContent = `Buy Oven (Price: ${ovenPrice})`;
+
+        // ปรับความจางของปุ่มถ้าเงินไม่พอ
         if (score < ovenPrice) {
             buyOvenBtn.style.opacity = "0.6";
         } else {
